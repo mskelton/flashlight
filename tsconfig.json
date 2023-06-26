@@ -1,0 +1,6 @@
+{
+  "extends": "@mskelton/tsconfig",
+  "ts-node": {
+    "transpileOnly": true
+  }
+}
