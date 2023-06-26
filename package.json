@@ -2,13 +2,18 @@
   "name": "flashlight",
   "description": "Find usages of imported symbols in your codebase.",
   "version": "1.0.0",
+  "author": "Mark Skelton",
+  "license": "ISC",
   "type": "module",
   "scripts": {
-    "dev": "ts-node --esm ./src/index.ts"
+    "dev": "ts-node --esm ./src/cli.ts",
+    "build": "tsc",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "bin": {
+    "flashlight": "./dist/cli.js"
+  },
   "dependencies": {
     "@swc/core": "^1.3.66",
     "globby": "^13.2.0",
