@@ -4,11 +4,15 @@ import { globby } from 'globby'
 import { join } from 'node:path'
 import yargs from 'yargs/yargs'
 
-const argv = await yargs(process.argv.slice(2)).options({
-  cwd: { default: process.cwd(), type: 'string' },
-  name: { type: 'string' },
-  source: { type: 'string' },
-}).argv
+const argv = await yargs(process.argv.slice(2))
+  .alias('c', 'cwd')
+  .alias('n', 'name')
+  .alias('s', 'source')
+  .options({
+    cwd: { default: process.cwd(), type: 'string' },
+    name: { type: 'string' },
+    source: { type: 'string' },
+  }).argv
 
 const paths = await globby(['**/*.{js,jsx,ts,tsx}'], { cwd: argv.cwd })
 const filenames: string[] = []
