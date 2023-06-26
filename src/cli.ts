@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import swc from '@swc/core'
 import { globby } from 'globby'
 import { join } from 'node:path'
