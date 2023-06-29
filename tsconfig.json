@@ -1,9 +1,0 @@
-{
-  "extends": "@mskelton/tsconfig",
-  "compilerOptions": {
-    "outDir": "dist"
-  },
-  "ts-node": {
-    "transpileOnly": true
-  }
-}
