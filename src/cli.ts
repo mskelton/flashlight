@@ -1,47 +1,41 @@
 #!/usr/bin/env node
-import swc from '@swc/core'
-import { globby } from 'globby'
-import { join } from 'node:path'
+import { createRequire } from 'module'
 import yargs from 'yargs/yargs'
+import { analyze } from './analysis.js'
+import { getReporter } from './reporters/index.js'
+
+const require = createRequire(import.meta.url)
 
 const argv = await yargs(process.argv.slice(2))
-  .alias('c', 'cwd')
-  .alias('n', 'name')
-  .alias('s', 'source')
+  .version(require('../package.json').version)
   .options({
-    cwd: { default: process.cwd(), type: 'string' },
-    name: { type: 'string' },
-    source: { type: 'string' },
-  }).argv
-
-const paths = await globby(['**/*.{js,jsx,ts,tsx}'], { cwd: argv.cwd })
-const filenames: string[] = []
-
-for await (const path of paths) {
-  const filename = join(argv.cwd, path)
-  const res = await swc.parseFile(filename, {
-    syntax: 'typescript',
-    tsx: true,
+    cwd: {
+      alias: 'c',
+      default: process.cwd(),
+      type: 'string',
+    },
+    name: {
+      alias: 'n',
+      requiresArg: true,
+      type: 'string',
+    },
+    reporter: {
+      choices: ['console', 'quickfix'],
+      default: 'console',
+      type: 'string',
+    },
+    source: {
+      alias: 's',
+      requiresArg: true,
+      type: 'string',
+    },
   })
+  .alias('h', 'help')
+  .alias('v', 'version')
+  .demandOption('source')
+  .demandOption('name').argv
 
-  const imports = res.body
-    .filter(
-      (node): node is swc.ImportDeclaration => node.type === 'ImportDeclaration'
-    )
-    .filter((node) => node.source.value === argv.source)
-
-  const specifiers = imports.flatMap((node) =>
-    node.specifiers
-      .filter(
-        (node): node is swc.NamedImportSpecifier =>
-          node.type === 'ImportSpecifier'
-      )
-      .filter((node) => (node.imported ?? node.local).value === argv.name)
-  )
-
-  if (specifiers.length) {
-    filenames.push(filename)
-  }
-}
-
-console.log(filenames.join('\n'))
+const reporter = getReporter(argv.reporter)
+reporter.start()
+await analyze(reporter, argv)
+reporter.end()
