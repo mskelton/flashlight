@@ -9,7 +9,15 @@ syntax aware searching is required.
 
 ## Installation
 
-TODO
+You can install the latest version from the [releases page](https://github.com/mskelton/flashlight/releases/latest).
+
+Or you can build from source.
+
+```bash
+git clone git@github.com:mskelton/flashlight.git
+cd flashlight
+cargo install --path .
+```
 
 ## Usage
 
@@ -49,6 +57,6 @@ formats are:
 - `quickfix` - Formats the output as JSON (alias `vi`)
 - `json` - Formats the output as a Vim quickfix list
 
-```
+```bash
 flashlight --source react --format json
 ```
