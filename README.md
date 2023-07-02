@@ -2,9 +2,40 @@
 
 Find usages of imported symbols in your codebase.
 
-## Contributing
+This package is especially helpful for finding imported symbols when the
+symbol is a non-unique name or multiple import sources may export the
+same name. In these situations, simple find/replace is not often enough and
+syntax aware searching is required.
+
+## Installation
+
+TODO
+
+## Usage
+
+### Find all imports
+
+To find all imports for a given import source (e.g., `react`), run flashlight
+with just the `--source` command.
 
 ```bash
-pnpm install
-pnpm dev
+flashlight --source react
+```
+
+### Find imported symbols by name
+
+Finding all imports of a given source is useful, but more useful is to search
+for specific symbols.
+
+```bash
+flashlight --source react --name useState
+```
+
+## Change working directory
+
+By default, flashlight uses the current working directory to search. You can
+change the working directory using the `--cwd` argument.
+
+```bash
+flashlight --source react --name useState --cwd ./packages/a
 ```
