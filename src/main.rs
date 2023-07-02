@@ -1,20 +1,23 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-use console::style;
+use logger::{ConsoleLogger, JsonLogger, Logger, LoggerType, QuickfixLogger};
+use processor::Processor;
 
 mod analysis;
+mod logger;
 mod parser;
 mod processor;
 mod utils;
 
 #[derive(clap::ValueEnum, Clone, Debug)]
 enum OutputFormat {
-    /// A human-readable format
+    /// The default console format
     Default,
-    /// A machine-readable format
+    /// Formats the output as JSON
     Json,
-    /// A machine-readable format
+    /// Formats the output as a Vim quickfix list
+    #[value(alias("vi"))]
     Quickfix,
 }
 
@@ -36,19 +39,27 @@ struct Args {
 
     /// The output format. The default format
     #[arg(long)]
-    // TODO: Finish this
-    // #[arg(long, default_value = OutputFormat::Default)]
     format: Option<OutputFormat>,
 }
 
 fn main() {
     let args = Args::parse();
-    println!("{}\n", style("Searching for matches...").bold());
+    let mut logger = get_logger(args.format.unwrap_or(OutputFormat::Default));
 
-    processor::Processor::new(analysis::AnalysisRequest {
+    let request = analysis::AnalysisRequest {
         path: PathBuf::from(args.cwd),
         source: args.source,
         specifier: args.name,
-    })
-    .process();
+    };
+
+    Processor::new(request, &mut logger).process();
+    logger.end()
+}
+
+fn get_logger(format: OutputFormat) -> LoggerType {
+    match format {
+        OutputFormat::Default => LoggerType::Console(ConsoleLogger::new()),
+        OutputFormat::Quickfix => LoggerType::Quickfix(QuickfixLogger::new()),
+        OutputFormat::Json => LoggerType::Json(JsonLogger::new()),
+    }
 }

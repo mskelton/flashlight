@@ -37,5 +37,18 @@ By default, flashlight uses the current working directory to search. You can
 change the working directory using the `--cwd` argument.
 
 ```bash
-flashlight --source react --name useState --cwd ./packages/a
+flashlight --source react --cwd ./packages/a
+```
+
+### Format
+
+You can customize the output format based on your use case. The supported
+formats are:
+
+- `default` - The default console format
+- `quickfix` - Formats the output as JSON (alias `vi`)
+- `json` - Formats the output as a Vim quickfix list
+
+```
+flashlight --source react --format json
 ```

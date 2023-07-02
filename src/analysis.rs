@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
-use swc_common::Spanned;
 use swc_ecma_ast as ast;
 
+use crate::logger::Logger;
 use crate::parser::ParsedModule;
 use crate::utils;
 
@@ -10,6 +10,13 @@ pub struct AnalysisRequest {
     pub path: PathBuf,
     pub source: String,
     pub specifier: Option<String>,
+}
+
+pub struct AnalysisResponse<'a> {
+    pub request: &'a AnalysisRequest,
+    pub parsed: &'a ParsedModule<'a>,
+    pub imports: &'a Vec<&'a ast::ImportDecl>,
+    pub specifiers: Option<&'a Vec<&'a ast::ImportNamedSpecifier>>,
 }
 
 fn get_imports<'a>(
@@ -37,22 +44,26 @@ fn get_specifiers<'a>(
         .collect::<Vec<_>>();
 }
 
-pub fn analyze(parsed: &ParsedModule, request: &AnalysisRequest) {
+pub fn analyze<T: Logger>(
+    parsed: &ParsedModule,
+    request: &AnalysisRequest,
+    logger: &mut T,
+) {
     let imports = get_imports(&parsed.module, &request);
     if imports.len() == 0 {
         return;
     }
 
-    if let Some(specifier) = &request.specifier {
-        let specifiers = get_specifiers(&imports, specifier);
-        if specifiers.len() == 0 {
-            return;
-        }
-    }
+    let specifiers = request
+        .specifier
+        .as_ref()
+        .map(|specifier| get_specifiers(&imports, specifier))
+        .filter(|specifiers| specifiers.len() > 0);
 
-    let span = parsed.module.span_lo();
-    let lo = parsed.source_map.lookup_char_pos_adj(span);
-
-    // TODO: Print import
-    println!("{}:{}:{}: {}", lo.filename, lo.line, lo.col.0 + 1, "");
+    logger.log(AnalysisResponse {
+        imports: &imports,
+        parsed,
+        request,
+        specifiers: specifiers.as_ref(),
+    });
 }

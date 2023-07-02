@@ -5,18 +5,26 @@ use ignore::types::TypesBuilder;
 use ignore::WalkBuilder;
 
 use crate::analysis::{self, AnalysisRequest};
+use crate::logger::Logger;
 use crate::parser::{self, ParseError};
 
-pub struct Processor {
+pub struct Processor<'a, L>
+where
+    L: Logger,
+{
     request: AnalysisRequest,
+    logger: &'a mut L,
 }
 
-impl Processor {
-    pub fn new(request: AnalysisRequest) -> Processor {
-        Processor { request }
+impl<'a, L> Processor<'a, L>
+where
+    L: Logger,
+{
+    pub fn new(request: AnalysisRequest, logger: &mut L) -> Processor<L> {
+        Processor { logger, request }
     }
 
-    pub fn process(&self) {
+    pub fn process(&mut self) {
         let matcher = TypesBuilder::new()
             .add_defaults()
             .select("js")
@@ -31,7 +39,9 @@ impl Processor {
             .filter_map(|entry| entry.ok())
             .filter(|file| file.file_type().map_or(false, |ft| ft.is_file()))
             .for_each(|file| match parser::parse(&file.path()) {
-                Ok(parsed) => analysis::analyze(&parsed, &self.request),
+                Ok(parsed) => {
+                    analysis::analyze(&parsed, &self.request, self.logger)
+                }
                 Err(err) => self.print_error(&file.path(), err),
             });
     }
