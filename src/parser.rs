@@ -22,7 +22,11 @@ pub fn parse(path: &Path) -> Result<ParsedModule, ParseError> {
     let file = source_map.load_file(path).map_err(|err| ParseError::IO(err))?;
 
     let lexer = Lexer::new(
-        Syntax::Typescript(TsConfig { tsx: true, ..Default::default() }),
+        Syntax::Typescript(TsConfig {
+            decorators: true,
+            tsx: true,
+            ..Default::default()
+        }),
         EsVersion::EsNext,
         StringInput::from(&*file),
         None,

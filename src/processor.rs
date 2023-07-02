@@ -47,7 +47,7 @@ where
     }
 
     fn print_error(&self, path: &Path, err: ParseError) {
-        let error_text = style("Error").red().bold();
+        let error_text = style("error").red().bold();
 
         match err {
             ParseError::IO(err) => {
