@@ -27,29 +27,23 @@ jobs:
           # Linux
         - build: linux
           os: ubuntu-latest
-          rust: nightly
           target: x86_64-unknown-linux-musl
         - build: linux-arm
           os: ubuntu-latest
-          rust: nightly
           target: arm-unknown-linux-gnueabihf
           # macOS
         - build: macos
           os: macos-latest
-          rust: nightly
           target: x86_64-apple-darwin
           # Windows
         - build: win-msvc
           os: windows-latest
-          rust: nightly
           target: x86_64-pc-windows-msvc
         - build: win-gnu
           os: windows-latest
-          rust: nightly-x86_64-gnu
           target: x86_64-pc-windows-gnu
         - build: win32-msvc
           os: windows-latest
-          rust: nightly
           target: i686-pc-windows-msvc
     steps:
     - name: Checkout
@@ -62,7 +56,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@v1
       with:
-        toolchain: ${{ matrix.rust }}
+        toolchain: stable
         target: ${{ matrix.target }}
 
     - name: Use Cross
