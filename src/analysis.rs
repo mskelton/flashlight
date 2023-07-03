@@ -54,11 +54,17 @@ pub fn analyze<T: Logger>(
         return;
     }
 
-    let specifiers = request
-        .specifier
-        .as_ref()
-        .map(|specifier| get_specifiers(&imports, specifier))
-        .filter(|specifiers| specifiers.len() > 0);
+    let specifiers = match &request.specifier {
+        Some(specifier) => {
+            let specifiers = get_specifiers(&imports, &specifier);
+
+            match specifiers.len() {
+                0 => return,
+                _ => Some(specifiers),
+            }
+        }
+        None => None,
+    };
 
     logger.log(AnalysisResponse {
         imports: &imports,
