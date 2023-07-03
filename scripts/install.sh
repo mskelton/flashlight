@@ -14,7 +14,7 @@ MAGENTA="$(tput setaf 5 2>/dev/null || printf '')"
 NO_COLOR="$(tput sgr0 2>/dev/null || printf '')"
 
 SUPPORTED_TARGETS="x86_64-unknown-linux-musl arm-unknown-linux-gnueabihf \
-                   x86_64-apple-darwin arm-apple-darwin"
+                   x86_64-apple-darwin aarch64-apple-darwin"
 
 info() {
 	printf '%s\n' "${BOLD}${GREY}>${NO_COLOR} $*"
@@ -202,13 +202,15 @@ detect_platform() {
 
 # Currently supporting:
 #   - x86_64
+#   - arm
 #   - arm64
 detect_arch() {
 	arch="$(uname -m | tr '[:upper:]' '[:lower:]')"
 
 	case "${arch}" in
 	amd64) arch="x86_64" ;;
-	arm64) arch="arm" ;;
+	armv*) arch="arm" ;;
+	arm64) arch="aarch64" ;;
 	esac
 
 	# `uname -m` in some cases mis-reports 32-bit OS as 64-bit, so double check
