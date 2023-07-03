@@ -57,8 +57,11 @@ jobs:
 
     - name: Build
       run: |
+        asset="flashlight-${{ matrix.target }}"
+
         cd target/${{ matrix.target }}/release
-        tar czvf ../../../flashlight-${{ matrix.target }}.tar.gz flashlight
+        tar czvf ../../../$asset.tar.gz flashlight
+        echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
         cd -
 
     - name: Upload release archive
