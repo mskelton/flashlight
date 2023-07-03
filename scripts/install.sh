@@ -14,8 +14,7 @@ MAGENTA="$(tput setaf 5 2>/dev/null || printf '')"
 NO_COLOR="$(tput sgr0 2>/dev/null || printf '')"
 
 SUPPORTED_TARGETS="x86_64-unknown-linux-musl arm-unknown-linux-gnueabihf \
-                   x86_64-apple-darwin arm-apple-darwin \
-                   x86_64-pc-windows-msvc 86_64-pc-windows-gnu i686-pc-windows-msvc"
+                   x86_64-apple-darwin arm-apple-darwin"
 
 info() {
 	printf '%s\n' "${BOLD}${GREY}>${NO_COLOR} $*"

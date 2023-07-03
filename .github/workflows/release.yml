@@ -35,16 +35,6 @@ jobs:
         - build: macos
           os: macos-latest
           target: x86_64-apple-darwin
-          # Windows
-        - build: win-msvc
-          os: windows-latest
-          target: x86_64-pc-windows-msvc
-        - build: win-gnu
-          os: windows-latest
-          target: x86_64-pc-windows-gnu
-        - build: win32-msvc
-          os: windows-latest
-          target: i686-pc-windows-msvc
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -89,15 +79,7 @@ jobs:
           arm-linux-gnueabihf-strip \
           /target/arm-unknown-linux-gnueabihf/release/flashlight
 
-    - name: Build (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        cd target/${{ matrix.target }}/release
-        7z a ../../../flashlight-${{ matrix.target }}.zip flashlight.exe
-        cd -
-
-    - name: Build (macOS/Linux)
-      if: matrix.os != 'windows-latest'
+    - name: Build
       run: |
         cd target/${{ matrix.target }}/release
         tar czvf ../../../flashlight-${{ matrix.target }}.tar.gz flashlight
