@@ -96,7 +96,7 @@ download() {
 	info "This is likely due to Flashlight not yet supporting your configuration."
 	info "If you would like to see a build for your configuration,"
 	info "please create an issue requesting a build for ${MAGENTA}${TARGET}${NO_COLOR}:"
-	info "${BOLD}${UNDERLINE}https://github.com/flashlight/flashlight/issues/new/${NO_COLOR}"
+	info "${BOLD}${UNDERLINE}https://github.com/mskelton/flashlight/issues/new/${NO_COLOR}"
 	return $rc
 }
 
@@ -121,7 +121,7 @@ unpack() {
 	error "Unknown package extension."
 	printf "\n"
 	info "This almost certainly results from a bug in this script--please file a"
-	info "bug report at https://github.com/flashlight/flashlight/issues"
+	info "bug report at https://github.com/mskelton/flashlight/issues"
 	return 1
 }
 
@@ -295,7 +295,7 @@ is_build_available() {
 		printf "\n" >&2
 		info "If you would like to see a build for your configuration,"
 		info "please create an issue requesting a build for ${MAGENTA}${target}${NO_COLOR}:"
-		info "${BOLD}${UNDERLINE}https://github.com/flashlight/flashlight/issues/new/${NO_COLOR}"
+		info "${BOLD}${UNDERLINE}https://github.com/mskelton/flashlight/issues/new/${NO_COLOR}"
 		printf "\n"
 		exit 1
 	fi
@@ -315,7 +315,7 @@ if [ -z "${ARCH-}" ]; then
 fi
 
 if [ -z "${BASE_URL-}" ]; then
-	BASE_URL="https://github.com/flashlight/flashlight/releases"
+	BASE_URL="https://github.com/mskelton/flashlight/releases"
 fi
 
 # Non-POSIX shells can break once executing code due to semantic differences
