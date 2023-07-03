@@ -1,9 +1,9 @@
 name: Release
 on:
+  push:
   release:
     types:
       - published
-      - edited
 jobs:
   release:
     name: Release
