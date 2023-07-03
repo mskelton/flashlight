@@ -93,14 +93,14 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
         cd target/${{ matrix.target }}/release
-        7z a ../../../${{ matrix.name }} flashlight.exe
+        7z a ../../../flashlight-${{ matrix.target }}.zip flashlight.exe
         cd -
 
     - name: Build (macOS/Linux)
       if: matrix.os != 'windows-latest'
       run: |
         cd target/${{ matrix.target }}/release
-        tar czvf ../../../${{ matrix.name }} flashlight
+        tar czvf ../../../flashlight-${{ matrix.target }}.tar.gz flashlight
         cd -
 
     - name: Upload release archive
