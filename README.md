@@ -11,7 +11,6 @@ syntax aware searching is required.
 
 You can install Flashlight by running the install script which will download
 the [latest release](https://github.com/mskelton/flashlight/releases/latest).
-.
 
 ```bash
 curl -LSfs https://mskelton.dev/flashlight/install | sh
@@ -60,8 +59,8 @@ You can customize the output format based on your use case. The supported
 formats are:
 
 - `default` - The default console format
-- `quickfix` - Formats the output as JSON (alias `vi`)
-- `json` - Formats the output as a Vim quickfix list
+- `json` - Formats the output as JSON
+- `quickfix` - Formats the output as a Vim quickfix list (alias `vi`)
 
 ```bash
 flashlight --source react --format json
