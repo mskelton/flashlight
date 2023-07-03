@@ -13,12 +13,9 @@ BLUE="$(tput setaf 4 2>/dev/null || printf '')"
 MAGENTA="$(tput setaf 5 2>/dev/null || printf '')"
 NO_COLOR="$(tput sgr0 2>/dev/null || printf '')"
 
-SUPPORTED_TARGETS="x86_64-unknown-linux-gnu x86_64-unknown-linux-musl \
-                  i686-unknown-linux-musl aarch64-unknown-linux-musl \
-                  arm-unknown-linux-musleabihf x86_64-apple-darwin \
-                  aarch64-apple-darwin x86_64-pc-windows-msvc \
-                  i686-pc-windows-msvc aarch64-pc-windows-msvc \
-                  x86_64-unknown-freebsd"
+SUPPORTED_TARGETS="x86_64-unknown-linux-musl arm-unknown-linux-gnueabihf \
+                   x86_64-apple-darwin arm-apple-darwin \
+                   x86_64-pc-windows-msvc 86_64-pc-windows-gnu i686-pc-windows-msvc"
 
 info() {
 	printf '%s\n' "${BOLD}${GREY}>${NO_COLOR} $*"
@@ -186,23 +183,19 @@ install() {
 }
 
 # Currently supporting:
-#   - win (Git Bash)
-#   - darwin
+#   - macOS
 #   - linux
 #   - linux_musl (Alpine)
-#   - freebsd
+#   - win (Git Bash)
 detect_platform() {
 	platform="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
 	case "${platform}" in
+	darwin) platform="apple-darwin" ;;
+	linux) platform="unknown-linux-musl" ;;
 	msys_nt*) platform="pc-windows-msvc" ;;
 	cygwin_nt*) platform="pc-windows-msvc" ;;
-	# mingw is Git-Bash
 	mingw*) platform="pc-windows-msvc" ;;
-	# use the statically compiled musl bins on linux to avoid linking issues.
-	linux) platform="unknown-linux-musl" ;;
-	darwin) platform="apple-darwin" ;;
-	freebsd) platform="unknown-freebsd" ;;
 	esac
 
 	printf '%s' "${platform}"
@@ -210,16 +203,13 @@ detect_platform() {
 
 # Currently supporting:
 #   - x86_64
-#   - i386
-#   - arm
 #   - arm64
 detect_arch() {
 	arch="$(uname -m | tr '[:upper:]' '[:lower:]')"
 
 	case "${arch}" in
 	amd64) arch="x86_64" ;;
-	armv*) arch="arm" ;;
-	arm64) arch="aarch64" ;;
+	arm64) arch="arm" ;;
 	esac
 
 	# `uname -m` in some cases mis-reports 32-bit OS as 64-bit, so double check
@@ -236,10 +226,6 @@ detect_target() {
 	arch="$1"
 	platform="$2"
 	target="$arch-$platform"
-
-	if [ "${target}" = "arm-unknown-linux-musl" ]; then
-		target="${target}eabihf"
-	fi
 
 	printf '%s' "${target}"
 }
