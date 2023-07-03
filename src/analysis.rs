@@ -54,6 +54,8 @@ pub fn analyze<T: Logger>(
         return;
     }
 
+    // If the user provided a specifier, we'll check if there are any matches
+    // and only log those.
     let specifiers = match &request.specifier {
         Some(specifier) => {
             let specifiers = get_specifiers(&imports, &specifier);
@@ -66,6 +68,8 @@ pub fn analyze<T: Logger>(
         None => None,
     };
 
+    // When calling `logger.log`, None for specifiers indicates that the user
+    // did not provide a specifier, and we should log all matching imports.
     logger.log(AnalysisResponse {
         imports: &imports,
         parsed,
