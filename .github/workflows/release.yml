@@ -1,9 +1,9 @@
 name: Release
 on:
+  push:
   release:
     types:
       - published
-      - edited
 jobs:
   release:
     name: Release
@@ -20,39 +20,21 @@ jobs:
       TARGET_DIR: ./target
       # Emit backtraces on panics.
       RUST_BACKTRACE: 1
-      # Build static releases with PCRE2.
-      PCRE2_SYS_STATIC: 1
     strategy:
       matrix:
-        build: [linux, linux-arm, macos, win-msvc, win-gnu, win32-msvc]
+        build: [linux, linux-arm, macos]
         include:
           # Linux
         - build: linux
           os: ubuntu-latest
-          rust: nightly
           target: x86_64-unknown-linux-musl
         - build: linux-arm
           os: ubuntu-latest
-          rust: nightly
           target: arm-unknown-linux-gnueabihf
           # macOS
         - build: macos
           os: macos-latest
-          rust: nightly
           target: x86_64-apple-darwin
-          # Windows
-        - build: win-msvc
-          os: windows-latest
-          rust: nightly
-          target: x86_64-pc-windows-msvc
-        - build: win-gnu
-          os: windows-latest
-          rust: nightly-x86_64-gnu
-          target: x86_64-pc-windows-gnu
-        - build: win32-msvc
-          os: windows-latest
-          rust: nightly
-          target: i686-pc-windows-msvc
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -64,7 +46,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@v1
       with:
-        toolchain: ${{ matrix.rust }}
+        toolchain: stable
         target: ${{ matrix.target }}
 
     - name: Use Cross
@@ -82,7 +64,7 @@ jobs:
         echo "target dir is: ${{ env.TARGET_DIR }}"
 
     - name: Build release binary
-      run: ${{ env.CARGO }} build --verbose --release --features pcre2 ${{ env.TARGET_FLAGS }}
+      run: ${{ env.CARGO }} build --verbose --release ${{ env.TARGET_FLAGS }}
 
     - name: Strip release binary (linux and macos)
       if: matrix.build == 'linux' || matrix.build == 'macos'
@@ -97,18 +79,10 @@ jobs:
           arm-linux-gnueabihf-strip \
           /target/arm-unknown-linux-gnueabihf/release/flashlight
 
-    - name: Build (Windows)
-      if: matrix.os == 'windows-latest'
+    - name: Build
       run: |
         cd target/${{ matrix.target }}/release
-        7z a ../../../${{ matrix.name }} flashlight.exe
-        cd -
-
-    - name: Build (macOS/Linux)
-      if: matrix.os != 'windows-latest'
-      run: |
-        cd target/${{ matrix.target }}/release
-        tar czvf ../../../${{ matrix.name }} flashlight
+        tar czvf ../../../flashlight-${{ matrix.target }}.tar.gz flashlight
         cd -
 
     - name: Upload release archive
