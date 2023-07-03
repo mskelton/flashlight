@@ -1,0 +1,28 @@
+name: Release
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Build Binary
+        run: cargo build --release --locked
+      - name: Upload Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./target/release/flashlight
+          asset_name: flashlight
+          asset_content_type: application/octet-stream
