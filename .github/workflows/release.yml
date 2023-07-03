@@ -61,7 +61,7 @@ jobs:
 
         cd target/${{ matrix.target }}/release
         tar czvf ../../../$asset.tar.gz flashlight
-        echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
+        echo "ASSET=$asset.tar.gz" >> $GITHUB_ENV
         cd -
 
     - name: Upload release archive
