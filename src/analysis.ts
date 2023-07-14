@@ -1,6 +1,5 @@
 import swc from '@swc/core'
 import fs from 'node:fs/promises'
-import { join } from 'node:path'
 import { isImportDeclaration, isImportSpecifier } from './ast.js'
 import { parse } from './parser.js'
 import { Reporter } from './reporters/Reporter.js'
@@ -42,7 +41,6 @@ export async function analyze(
   { cwd, name, source }: AnalyzeOptions
 ) {
   for (const filename of await walk({ cwd })) {
-    console.log(filename)
     const sourceCode = await fs.readFile(filename, 'utf8')
 
     try {
