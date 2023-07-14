@@ -1,6 +1,7 @@
 {
   "extends": "@mskelton/tsconfig",
   "compilerOptions": {
+    "noEmit": false,
     "outDir": "dist"
   },
   "ts-node": {
