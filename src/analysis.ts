@@ -41,18 +41,22 @@ export async function analyze(
   reporter: Reporter,
   { cwd, name, source }: AnalyzeOptions
 ) {
-  for await (const path of walk({ cwd })) {
-    const filename = join(cwd, path.toString())
+  for (const filename of await walk({ cwd })) {
     const sourceCode = await fs.readFile(filename, 'utf8')
-    const program = await parse(sourceCode)
-    const imports = getImports(program, source)
-    const specifiers = getSpecifiers(imports, name)
 
-    if (!specifiers.length) return
-    reporter.progress({
-      filename,
-      source: sourceCode,
-      specifiers,
-    })
+    try {
+      const program = await parse(filename, sourceCode)
+      const imports = getImports(program, source)
+      const specifiers = getSpecifiers(imports, name)
+
+      if (!specifiers.length) continue
+      reporter.progress({
+        filename,
+        source: sourceCode,
+        specifiers,
+      })
+    } catch (e) {
+      console.log(`Failed to parse ${filename}`)
+    }
   }
 }

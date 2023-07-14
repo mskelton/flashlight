@@ -1,9 +1,10 @@
 import swc from '@swc/core'
 
-export function parse(sourceCode: string) {
+export function parse(filename: string, sourceCode: string) {
   return swc.parse(sourceCode, {
-    syntax: 'typescript',
+    decorators: true,
+    syntax: /\.jsx?$/.test(filename) ? 'ecmascript' : 'typescript',
     target: 'esnext',
-    tsx: true,
+    tsx: filename.endsWith('.tsx'),
   })
 }
