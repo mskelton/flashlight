@@ -42,6 +42,7 @@ export async function analyze(
   { cwd, name, source }: AnalyzeOptions
 ) {
   for (const filename of await walk({ cwd })) {
+    console.log(filename)
     const sourceCode = await fs.readFile(filename, 'utf8')
 
     try {
