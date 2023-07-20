@@ -3,6 +3,8 @@ on:
   release:
     types:
       - published
+env:
+  BINARY_NAME: flashlight
 jobs:
   release:
     name: Release
@@ -47,7 +49,7 @@ jobs:
 
       - name: Strip release binary (linux and macos)
         if: matrix.build == 'linux' || matrix.build == 'macos'
-        run: strip "target/${{ matrix.target }}/release/flashlight"
+        run: strip "target/${{ matrix.target }}/release/$BINARY_NAME"
 
       - name: Strip release binary (arm)
         if: matrix.build == 'linux-arm'
@@ -56,14 +58,14 @@ jobs:
             "$PWD/target:/target:Z" \
             rustembedded/cross:arm-unknown-linux-gnueabihf \
             arm-linux-gnueabihf-strip \
-            /target/arm-unknown-linux-gnueabihf/release/flashlight
+            /target/arm-unknown-linux-gnueabihf/release/$BINARY_NAME
 
       - name: Build
         run: |
-          asset="flashlight-${{ matrix.target }}"
+          asset="$BINARY_NAME-${{ matrix.target }}"
 
           cd target/${{ matrix.target }}/release
-          tar czvf ../../../$asset.tar.gz flashlight
+          tar czvf ../../../$asset.tar.gz $BINARY_NAME
           echo "ASSET=$asset.tar.gz" >> $GITHUB_ENV
           cd -
 
