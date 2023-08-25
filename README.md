@@ -24,33 +24,58 @@ cd flashlight
 cargo install --path .
 ```
 
-## Usage
+## Commands
 
-### Find all imports
+### `imports`
 
-To find all imports for a given import source (e.g., `react`), run flashlight
-with just the `--source` command.
-
-```bash
-flashlight --source react
-```
-
-### Find imported symbols by name
-
-Finding all imports of a given source is useful, but more useful is to search
-for specific symbols.
+Searches for all imports for a given import source.
 
 ```bash
-flashlight --source react --name useState
+flashlight imports react
 ```
 
-## Change working directory
+You can also search for a specific import specifier.
+
+```bash
+flashlight imports react useState
+```
+
+### `jsx-tags`
+
+Searches for all JSX components with the given name.
+
+```bash
+flashlight jsx-tags Button
+```
+
+You can also search for components with a specific prop.
+
+```bash
+flashlight jsx-tags Button variant
+```
+
+### `unused-modules`
+
+Searches for unused modules in your project.
+
+> [!WARNING]
+> This search is not perfect! It relies on best guess semantic analysis to
+> determine if modules are imported, but dynamic imports or other such
+> mechanisms can result in code being marked as unused that is actually in use.
+
+```bash
+flashlight unused-modules
+```
+
+## Flags
+
+### Change working directory
 
 By default, flashlight uses the current working directory to search. You can
 change the working directory using the `--cwd` argument.
 
 ```bash
-flashlight --source react --cwd ./packages/a
+flashlight find-imports react --cwd ./packages/a
 ```
 
 ### Format
@@ -63,5 +88,5 @@ formats are:
 - `quickfix` - Formats the output as a Vim quickfix list (alias `vi`)
 
 ```bash
-flashlight --source react --format json
+flashlight find-imports --source react --format json
 ```
