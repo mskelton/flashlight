@@ -8,6 +8,7 @@ function Component() {
       <p className="foo">This is some content</p>
       <button id="one" />
       <button id="two" />
+      <button bool />
       <button bool={true} />
       <button re={/abc/} />
     </div>

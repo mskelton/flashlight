@@ -15,3 +15,7 @@ pub fn is_jsx_attribute(item: &ast::JSXAttrOrSpread) -> Option<&ast::JSXAttr> {
         _ => None,
     }
 }
+
+pub fn get_ident_name(ident: &swc_ecma_ast::Ident) -> String {
+    ident.sym.to_string()
+}

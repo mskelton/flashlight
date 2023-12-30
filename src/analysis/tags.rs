@@ -61,15 +61,15 @@ impl<'a> Visit for ElementVisitor<'a> {
 fn get_member_name(expr: &JSXMemberExpr) -> String {
     let prefix = match &expr.obj {
         JSXObject::JSXMemberExpr(expr) => get_member_name(expr),
-        JSXObject::Ident(ident) => ident.sym.to_string(),
+        JSXObject::Ident(ident) => utils::ast::get_ident_name(ident),
     };
 
-    format!("{}{}", prefix, expr.prop)
+    format!("{}.{}", prefix, utils::ast::get_ident_name(&expr.prop))
 }
 
 fn get_element_name(element: &JSXElement) -> String {
     match &element.opening.name {
-        JSXElementName::Ident(ident) => ident.sym.to_string(),
+        JSXElementName::Ident(ident) => utils::ast::get_ident_name(ident),
         JSXElementName::JSXMemberExpr(expr) => get_member_name(expr),
         JSXElementName::JSXNamespacedName(name) => {
             format!("{}{}", name.ns, name.name)
@@ -79,7 +79,7 @@ fn get_element_name(element: &JSXElement) -> String {
 
 fn get_attribute_name(attr: &JSXAttr) -> String {
     match &attr.name {
-        JSXAttrName::Ident(ident) => ident.sym.to_string(),
+        JSXAttrName::Ident(ident) => utils::ast::get_ident_name(ident),
         JSXAttrName::JSXNamespacedName(name) => {
             format!("{}{}", name.ns, name.name)
         }
@@ -115,7 +115,9 @@ fn get_attribute_value(attr: &JSXAttr) -> String {
             JSXAttrValue::Lit(lit) => get_lit_value(lit),
             _ => "".to_string(),
         },
-        None => "".to_string(),
+        // When there is no value, it is an implicit boolean attribute with
+        // a value of true.
+        None => String::from("true"),
     }
 }
 
