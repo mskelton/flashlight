@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use logger::{ConsoleLogger, JsonLogger, Logger, LoggerType, QuickfixLogger};
+use logger::{ConsoleLogger, JsonLogger, LoggerType, QuickfixLogger};
 use processor::Processor;
 
 mod analysis;
@@ -54,7 +54,7 @@ enum Commands {
         #[arg(index = 1)]
         name: String,
 
-        /// Only include tags with this attribute (e.g., onClick)
+        /// Only include tags with this attribute/value (e.g., onClick, type="button")
         #[arg(index = 2)]
         attribute: Option<String>,
     },
@@ -68,7 +68,7 @@ fn main() {
 
     match cli.command {
         Commands::Imports { source, specifier } => {
-            let request = analysis::AnalysisRequest {
+            let request = analysis::imports::ImportsRequest {
                 path: PathBuf::from(cli.cwd),
                 source,
                 specifier,
@@ -76,15 +76,21 @@ fn main() {
 
             Processor::new(request, &mut logger).process();
         }
-        Commands::JsxTags { .. } => {
-            todo!();
+        Commands::JsxTags { name, attribute } => {
+            let pair = utils::parse_key_value(attribute);
+            let request = analysis::tags::TagsRequest {
+                path: PathBuf::from(cli.cwd),
+                name,
+                attribute: pair.0,
+                value: pair.1,
+            };
+
+            Processor::new(request, &mut logger).process();
         }
         Commands::UnusedModules => {
             todo!();
         }
     };
-
-    logger.end();
 }
 
 fn get_logger(format: OutputFormat) -> LoggerType {

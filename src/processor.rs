@@ -1,26 +1,32 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use console::style;
 use ignore::types::TypesBuilder;
 use ignore::WalkBuilder;
 
-use crate::analysis::{self, AnalysisRequest};
-use crate::logger::Logger;
-use crate::parser::{self, ParseError};
+use crate::logger::{LogEntry, Logger};
+use crate::parser::{self, ParseError, ParsedModule};
 
-pub struct Processor<'a, L>
+pub trait ProcessorRequest {
+    fn path(&self) -> &PathBuf;
+    fn analyze(&self, module: &ParsedModule) -> Vec<LogEntry>;
+}
+
+pub struct Processor<'a, L, R>
 where
     L: Logger,
+    R: ProcessorRequest,
 {
-    request: AnalysisRequest,
+    request: R,
     logger: &'a mut L,
 }
 
-impl<'a, L> Processor<'a, L>
+impl<'a, L, R> Processor<'a, L, R>
 where
     L: Logger,
+    R: ProcessorRequest,
 {
-    pub fn new(request: AnalysisRequest, logger: &mut L) -> Processor<L> {
+    pub fn new(request: R, logger: &'a mut L) -> Processor<'a, L, R> {
         Processor { logger, request }
     }
 
@@ -32,7 +38,7 @@ where
             .build()
             .unwrap();
 
-        WalkBuilder::new(&self.request.path)
+        WalkBuilder::new(&self.request.path())
             .hidden(false)
             .types(matcher)
             .build()
@@ -40,7 +46,10 @@ where
             .filter(|file| file.file_type().map_or(false, |ft| ft.is_file()))
             .for_each(|file| match parser::parse(&file.path()) {
                 Ok(parsed) => {
-                    analysis::analyze(&parsed, &self.request, self.logger)
+                    self.request
+                        .analyze(&parsed)
+                        .into_iter()
+                        .for_each(|entry| self.logger.log(entry));
                 }
                 Err(err) => self.print_error(&file.path(), err),
             });
