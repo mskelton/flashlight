@@ -80,8 +80,10 @@ fn finds_tags_by_attr() -> Result<(), Box<dyn std::error::Error>> {
         "
         const ui = <>
             <p class='foo'>hi</p>
-            <p class='bar'>ho</p>
-            <div class='foo'>bar</div>
+            <p id='bar'>ho</p>
+            <div class='foo'>
+                <p class='bar'>ho</p>
+            </div>
         </>
         ",
     )?;
@@ -91,7 +93,7 @@ fn finds_tags_by_attr() -> Result<(), Box<dyn std::error::Error>> {
     cmd.assert().success().stdout(predicate::str::diff(format!(
         "{}\n{}\n",
         "./tags-by-attr.tsx:3:13 <p class='foo'>hi</p>",
-        "./tags-by-attr.tsx:4:13 <p class='bar'>ho</p>"
+        "./tags-by-attr.tsx:6:17 <p class='bar'>ho</p>"
     )));
 
     Ok(())
@@ -104,8 +106,10 @@ fn finds_tags_by_attr_value() -> Result<(), Box<dyn std::error::Error>> {
         "
         const ui = <>
             <p class='foo'>hi</p>
-            <p class='bar'>ho</p>
-            <div class='foo'>bar</div>
+            <p id='bar'>ho</p>
+            <div class='foo'>
+                <p class='bar'>ho</p>
+            </div>
         </>
         ",
     )?;
@@ -113,8 +117,72 @@ fn finds_tags_by_attr_value() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = create_cmd(&file)?;
     cmd.arg("tags").arg("p").arg("class=bar");
     cmd.assert().success().stdout(predicate::str::diff(
-        "./tags-by-attr-value.tsx:4:13 <p class='bar'>ho</p>\n",
+        "./tags-by-attr-value.tsx:6:17 <p class='bar'>ho</p>\n",
     ));
+
+    Ok(())
+}
+
+#[test]
+fn quickfix_logger() -> Result<(), Box<dyn std::error::Error>> {
+    let file = assert_fs::NamedTempFile::new("quickfix-logger.tsx")?;
+    file.write_str(
+        "
+        const ui = <>
+            <p class='foo'>hi</p>
+            <p class='bar'>ho</p>
+            <div class='foo'>bar</div>
+        </>
+        ",
+    )?;
+
+    let mut cmd = create_cmd(&file)?;
+    cmd.arg("--format").arg("quickfix").arg("tags").arg("p");
+    cmd.assert().success().stdout(predicate::str::contains(
+        "/quickfix-logger.tsx:3:13: <p class='foo'>hi</p>",
+    ));
+    cmd.assert().success().stdout(predicate::str::contains(
+        "/quickfix-logger.tsx:4:13: <p class='bar'>ho</p>",
+    ));
+
+    Ok(())
+}
+
+fn json(file: &str, line: u32, column: u32, text: &str) -> String {
+    format!(
+        "\\{{\"file\": \".*/{}\", \"line\": {}, \"column\": {}, \"text\": \"{}\"\\}}",
+        file, line, column, text
+    )
+}
+
+#[test]
+fn json_logger() -> Result<(), Box<dyn std::error::Error>> {
+    let file = assert_fs::NamedTempFile::new("json-logger.tsx")?;
+    file.write_str(
+        "
+        const ui = <>
+            <p class='foo'>hi</p>
+            <p class='bar'>ho</p>
+            <div class='foo'>bar</div>
+        </>
+        ",
+    )?;
+
+    let mut cmd = create_cmd(&file)?;
+    cmd.arg("--format").arg("json").arg("tags").arg("p");
+    cmd.assert().success().stdout(
+        predicate::str::is_match(
+            json("json-logger.tsx", 3, 13, "<p class='foo'>hi</p>").as_str(),
+        )
+        .unwrap(),
+    );
+
+    cmd.assert().success().stdout(
+        predicate::str::is_match(
+            json("json-logger.tsx", 4, 13, "<p class='bar'>ho</p>").as_str(),
+        )
+        .unwrap(),
+    );
 
     Ok(())
 }
