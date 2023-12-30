@@ -65,7 +65,7 @@ where
 
                 let loc = source.lookup_char_pos(span.lo);
                 let line = lines.file.lookup_line(span.lo)?;
-                let text = lines.file.get_line(line)?.to_string();
+                let text = lines.file.get_line(line)?.trim().to_string();
 
                 Some((text, loc))
             })
