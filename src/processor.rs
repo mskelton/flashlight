@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use console::style;
-use ignore::types::TypesBuilder;
+use ignore::types::{Types, TypesBuilder};
 use ignore::WalkBuilder;
 use swc_common::Span;
 
@@ -32,12 +32,7 @@ where
     }
 
     pub fn process(&mut self) {
-        let matcher = TypesBuilder::new()
-            .add_defaults()
-            .select("js")
-            .select("ts")
-            .build()
-            .unwrap();
+        let matcher = build_matcher().unwrap();
 
         WalkBuilder::new(&self.request.path())
             .hidden(false)
@@ -95,4 +90,26 @@ where
             }
         };
     }
+}
+
+/// Build a file matcher for accepted file types. The `add_defaults` method is
+/// not used to avoid matching file types such as `*.vue` which are not yet
+/// supported by Flashlight.
+fn build_matcher() -> Result<Types, ignore::Error> {
+    let mut builder = TypesBuilder::new();
+
+    // JS
+    builder.add("js", "*.js")?;
+    builder.add("js", "*.jsx")?;
+    builder.add("js", "*.cjs")?;
+    builder.add("js", "*.mjs")?;
+
+    // TS
+    builder.add("ts", "*.ts")?;
+    builder.add("ts", "*.tsx")?;
+    builder.add("ts", "*.cts")?;
+    builder.add("ts", "*.mts")?;
+    builder.add("ts", "*.mts")?;
+
+    builder.select("js").select("ts").build()
 }
