@@ -48,6 +48,12 @@ fn guess_syntax(path: &Path) -> Syntax {
             tsx: true,
             ..Default::default()
         }),
-        &_ => Syntax::Es(EsConfig { jsx: true, ..Default::default() }),
+        &_ => Syntax::Es(EsConfig {
+            decorators: true,
+            decorators_before_export: true,
+            import_attributes: true,
+            jsx: true,
+            ..Default::default()
+        }),
     };
 }
