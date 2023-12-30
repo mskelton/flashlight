@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use swc_common::Span;
-use swc_ecma_ast as ast;
+use swc_ecma_ast::ImportDecl;
+use swc_ecma_visit::{Visit, VisitWith};
 
 use crate::parser::ParsedModule;
 use crate::processor::ProcessorRequest;
@@ -12,57 +13,51 @@ pub struct ImportsRequest {
     pub specifier: Option<String>,
 }
 
-fn get_imports<'a>(
-    module: &'a ast::Module,
-    request: &ImportsRequest,
-) -> Vec<&'a ast::ImportDecl> {
-    return module
-        .body
-        .iter()
-        .filter_map(utils::ast::is_module_decl)
-        .filter_map(utils::ast::is_import_decl)
-        .filter(|import| import.src.value == request.source)
-        .collect::<Vec<_>>();
-}
-
-fn get_specifiers<'a>(
-    imports: &'a Vec<&ast::ImportDecl>,
-    name: &String,
-) -> Vec<&'a ast::ImportNamedSpecifier> {
-    return imports
-        .iter()
-        .flat_map(|import| import.specifiers.iter())
-        .filter_map(utils::ast::is_named_specifier)
-        .filter(|specifier| specifier.local.sym.eq(name))
-        .collect::<Vec<_>>();
-}
-
 impl ProcessorRequest for ImportsRequest {
     fn path(&self) -> &PathBuf {
         &self.path
     }
 
     fn analyze(&self, parsed: &ParsedModule) -> Vec<Span> {
-        let imports = get_imports(&parsed.module, &self);
-        if imports.len() == 0 {
-            return vec![];
+        let mut visitor = ImportVisitor { imports: Vec::new(), request: &self };
+
+        visitor.visit_module(&parsed.module);
+        visitor.imports
+    }
+}
+
+struct ImportVisitor<'a> {
+    imports: Vec<Span>,
+    request: &'a ImportsRequest,
+}
+
+impl<'a> Visit for ImportVisitor<'a> {
+    fn visit_import_decl(&mut self, node: &ImportDecl) {
+        // First check that the import source matches the request
+        if node.src.value == self.request.source {
+            // If a specifier is provided, check that the import contains
+            // the given specifier.
+            let has_specifier = match &self.request.specifier {
+                Some(spec) => has_required_specifier(node, &spec),
+                None => true,
+            };
+
+            if has_specifier {
+                self.imports.push(node.span);
+            }
         }
 
-        // If the user provided a specifier, we'll check if there are any matches
-        // and only log those.
-        // TODO: Update logs to include the specifier
-        match &self.specifier {
-            Some(specifier) => {
-                let specifiers = get_specifiers(&imports, &specifier);
-
-                match specifiers.len() {
-                    0 => return vec![],
-                    _ => Some(specifiers),
-                }
-            }
-            None => None,
-        };
-
-        return imports.iter().map(|import| import.span).collect();
+        node.visit_children_with(self)
     }
+}
+
+fn has_required_specifier(import: &ImportDecl, name: &String) -> bool {
+    let count = import
+        .specifiers
+        .iter()
+        .filter_map(utils::ast::is_named_specifier)
+        .filter(|specifier| specifier.local.sym.eq(name))
+        .count();
+
+    count > 0
 }
