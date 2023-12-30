@@ -5,7 +5,7 @@ use ignore::types::TypesBuilder;
 use ignore::WalkBuilder;
 use swc_common::Span;
 
-use crate::logger::{LogEntry, Logger};
+use crate::logger::Logger;
 use crate::parser::{self, ParseError, ParsedModule};
 
 pub trait ProcessorRequest {
@@ -63,14 +63,13 @@ where
                     Err(_) => return None,
                 };
 
-                let file = lines.file;
                 let loc = source.lookup_char_pos(span.lo);
-                let line = file.lookup_line(span.lo)?;
-                let text = file.get_line(line)?.to_string();
+                let line = lines.file.lookup_line(span.lo)?;
+                let text = lines.file.get_line(line)?.to_string();
 
-                Some(LogEntry { file, loc, text })
+                Some((text, loc))
             })
-            .for_each(|entry| self.logger.log(entry));
+            .for_each(|(text, loc)| self.logger.log(text, loc));
     }
 
     fn print_error(&self, path: &Path, err: ParseError) {

@@ -1,18 +1,10 @@
-use std::rc::Rc;
-
 use console::style;
-use swc_common::{Loc, SourceFile};
+use swc_common::Loc;
 
 use crate::utils::absolute_path;
 
-pub struct LogEntry {
-    pub file: Rc<SourceFile>,
-    pub loc: Loc,
-    pub text: String,
-}
-
 pub trait Logger {
-    fn log(&mut self, entry: LogEntry);
+    fn log(&mut self, text: String, loc: Loc);
 }
 
 pub struct ConsoleLogger;
@@ -26,11 +18,11 @@ pub enum LoggerType {
 }
 
 impl Logger for LoggerType {
-    fn log(&mut self, entry: LogEntry) {
+    fn log(&mut self, text: String, loc: Loc) {
         match self {
-            LoggerType::Console(logger) => logger.log(entry),
-            LoggerType::Quickfix(logger) => logger.log(entry),
-            LoggerType::Json(logger) => logger.log(entry),
+            LoggerType::Console(logger) => logger.log(text, loc),
+            LoggerType::Quickfix(logger) => logger.log(text, loc),
+            LoggerType::Json(logger) => logger.log(text, loc),
         }
     }
 }
@@ -42,13 +34,13 @@ impl ConsoleLogger {
 }
 
 impl Logger for ConsoleLogger {
-    fn log(&mut self, entry: LogEntry) {
+    fn log(&mut self, text: String, loc: Loc) {
         println!(
             "{}:{}:{} {}",
-            entry.file.name,
-            entry.loc.line,
-            entry.loc.col.0 + 1,
-            style(entry.text).cyan()
+            loc.file.name,
+            loc.line,
+            loc.col.0 + 1,
+            style(text).cyan()
         );
     }
 }
@@ -60,13 +52,13 @@ impl QuickfixLogger {
 }
 
 impl Logger for QuickfixLogger {
-    fn log(&mut self, entry: LogEntry) {
+    fn log(&mut self, text: String, loc: Loc) {
         println!(
             "{}:{}:{}: {}",
-            absolute_path(entry.file),
-            entry.loc.line,
-            entry.loc.col.0 + 1,
-            entry.text
+            absolute_path(loc.file),
+            loc.line,
+            loc.col.0 + 1,
+            text
         );
     }
 }
@@ -78,13 +70,13 @@ impl JsonLogger {
 }
 
 impl Logger for JsonLogger {
-    fn log(&mut self, entry: LogEntry) {
+    fn log(&mut self, text: String, loc: Loc) {
         println!(
             "{{\"file\": \"{}\", \"line\": {}, \"column\": {}, \"text\": \"{}\"}}",
-            absolute_path(entry.file),
-            entry.loc.line,
-            entry.loc.col.0 + 1,
-            entry.text,
+            absolute_path(loc.file),
+            loc.line,
+            loc.col.0 + 1,
+            text,
         );
     }
 }
