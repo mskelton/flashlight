@@ -49,7 +49,7 @@ enum Commands {
         specifier: Option<String>,
     },
     /// Find JSX tags
-    JsxTags {
+    Tags {
         /// The name of the tag (e.g., div)
         #[arg(index = 1)]
         name: String,
@@ -76,7 +76,7 @@ fn main() {
 
             Processor::new(request, &mut logger).process();
         }
-        Commands::JsxTags { name, attribute } => {
+        Commands::Tags { name, attribute } => {
             let pair = utils::parse_key_value(attribute);
             let request = analysis::tags::TagsRequest {
                 path: PathBuf::from(cli.cwd),

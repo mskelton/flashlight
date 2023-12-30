@@ -23,16 +23,9 @@ pub fn is_named_specifier(
     }
 }
 
-pub fn is_jsx_element(item: &ast::ModuleItem) -> Option<&ast::JSXElement> {
-    match item {
-        ast::JSXElement(element) => Some(element),
-        _ => None,
-    }
-}
-
 pub fn is_jsx_attribute(item: &ast::JSXAttrOrSpread) -> Option<&ast::JSXAttr> {
     match item {
-        ast::JSXAttr(attr) => Some(attr),
+        ast::JSXAttrOrSpread::JSXAttr(attr) => Some(attr),
         _ => None,
     }
 }

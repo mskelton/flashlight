@@ -3,13 +3,14 @@ use std::path::{Path, PathBuf};
 use console::style;
 use ignore::types::TypesBuilder;
 use ignore::WalkBuilder;
+use swc_common::Span;
 
 use crate::logger::{LogEntry, Logger};
 use crate::parser::{self, ParseError, ParsedModule};
 
 pub trait ProcessorRequest {
     fn path(&self) -> &PathBuf;
-    fn analyze(&self, module: &ParsedModule) -> Vec<LogEntry>;
+    fn analyze(&self, module: &ParsedModule) -> Vec<Span>;
 }
 
 pub struct Processor<'a, L, R>
@@ -45,14 +46,31 @@ where
             .filter_map(|entry| entry.ok())
             .filter(|file| file.file_type().map_or(false, |ft| ft.is_file()))
             .for_each(|file| match parser::parse(&file.path()) {
-                Ok(parsed) => {
-                    self.request
-                        .analyze(&parsed)
-                        .into_iter()
-                        .for_each(|entry| self.logger.log(entry));
-                }
+                Ok(parsed) => self.analyze(parsed),
                 Err(err) => self.print_error(&file.path(), err),
             });
+    }
+
+    fn analyze(&mut self, parsed: ParsedModule) {
+        let source = &parsed.source_map;
+
+        self.request
+            .analyze(&parsed)
+            .into_iter()
+            .filter_map(|span| {
+                let lines = match source.span_to_lines(span) {
+                    Ok(lines) => lines,
+                    Err(_) => return None,
+                };
+
+                let file = lines.file;
+                let loc = source.lookup_char_pos(span.lo);
+                let line = file.lookup_line(span.lo)?;
+                let text = file.get_line(line)?.to_string();
+
+                Some(LogEntry { file, loc, text })
+            })
+            .for_each(|entry| self.logger.log(entry));
     }
 
     fn print_error(&self, path: &Path, err: ParseError) {

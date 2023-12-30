@@ -1,7 +1,7 @@
 use std::path::PathBuf;
+use swc_common::Span;
 use swc_ecma_ast as ast;
 
-use crate::logger::LogEntry;
 use crate::parser::ParsedModule;
 use crate::processor::ProcessorRequest;
 use crate::utils;
@@ -42,7 +42,7 @@ impl ProcessorRequest for ImportsRequest {
         &self.path
     }
 
-    fn analyze(&self, parsed: &ParsedModule) -> Vec<LogEntry> {
+    fn analyze(&self, parsed: &ParsedModule) -> Vec<Span> {
         let imports = get_imports(&parsed.module, &self);
         if imports.len() == 0 {
             return vec![];
@@ -63,23 +63,6 @@ impl ProcessorRequest for ImportsRequest {
             None => None,
         };
 
-        let source = &parsed.source_map;
-
-        return imports
-            .iter()
-            .filter_map(|import| {
-                let lines = match source.span_to_lines(import.span) {
-                    Ok(lines) => lines,
-                    Err(_) => return None,
-                };
-
-                let file = lines.file;
-                let loc = source.lookup_char_pos(import.span.lo);
-                let line = file.lookup_line(import.span.lo)?;
-                let text = file.get_line(line)?.to_string();
-
-                Some(LogEntry { file, loc, text })
-            })
-            .collect();
+        return imports.iter().map(|import| import.span).collect();
     }
 }
