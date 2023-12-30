@@ -40,18 +40,20 @@ You can also search for a specific import specifier.
 flashlight imports react useState
 ```
 
-### `jsx-tags`
+### `tags`
 
-Searches for all JSX components with the given name.
+Searches for all JSX elements with the given name.
 
 ```bash
-flashlight jsx-tags Button
+flashlight tags Button
 ```
 
-You can also search for components with a specific prop.
+You can also search for elements with a specific attribute or attribute/value
+pair.
 
 ```bash
-flashlight jsx-tags Button variant
+flashlight tags Button variant
+flashlight tags Button variant=primary
 ```
 
 ### `unused-modules`
