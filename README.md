@@ -1,11 +1,16 @@
 # Flashlight
 
-Find usages of imported symbols in your codebase.
+CLI tool to help you analyze code usage in your project.
 
-This package is especially helpful for finding imported symbols when the
-symbol is a non-unique name or multiple import sources may export the
-same name. In these situations, simple find/replace is not often enough and
-syntax aware searching is required.
+Flashlight allows you to perform searches that would be difficult with normal
+string or regex searching such as:
+
+- Find all imports from `react` that imported `useMemo`
+- Find all `<Button>` tags with the attribute `type="primary"`
+
+Regex searches can work for this at times, but it becomes very complex when
+imports or tags span multiple lines. Flashlight provides a much easier way to
+perform these searches.
 
 ## Installation
 
@@ -56,19 +61,6 @@ flashlight tags Button variant
 flashlight tags Button variant=primary
 ```
 
-### `unused-modules`
-
-Searches for unused modules in your project.
-
-> [!WARNING]
-> This search is not perfect! It relies on best guess semantic analysis to
-> determine if modules are imported, but dynamic imports or other such
-> mechanisms can result in code being marked as unused that is actually in use.
-
-```bash
-flashlight unused-modules
-```
-
 ## Flags
 
 ### Change working directory
@@ -77,7 +69,7 @@ By default, flashlight uses the current working directory to search. You can
 change the working directory using the `--cwd` argument.
 
 ```bash
-flashlight find-imports react --cwd ./packages/a
+flashlight --cwd ./packages/a imports react
 ```
 
 ### Format
@@ -90,5 +82,5 @@ formats are:
 - `quickfix` - Formats the output as a Vim quickfix list (alias `vi`)
 
 ```bash
-flashlight find-imports --source react --format json
+flashlight --format json imports react
 ```
