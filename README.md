@@ -18,7 +18,7 @@ You can install Flashlight by running the install script which will download
 the [latest release](https://github.com/mskelton/flashlight/releases/latest).
 
 ```bash
-curl -LSfs https://mskelton.dev/flashlight/install | sh
+curl -LSfs https://go.mskelton.dev/flashlight/install | sh
 ```
 
 Or you can build from source.
